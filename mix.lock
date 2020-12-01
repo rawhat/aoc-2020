@@ -1,3 +1,4 @@
 %{
+  "gleam_stdlib": {:hex, :gleam_stdlib, "0.12.0", "722b00f9a08e44d9582922b4ef6e890ca60e2caebefe81192f3cc8d337f2f0cf", [:rebar3], [], "hexpm", "c3435f25629ed5f2c0d53a1bc2fdf89acdffa75f036cb27396c1ef70396f644a"},
   "mix_gleam": {:hex, :mix_gleam, "0.1.0", "a0cee5d30de865124a32ca6cd53b64c3e2ac57f12adf6e47b88fb673f47c716e", [:mix], [], "hexpm", "9ff518e6aab444c7f2e74038f9383020ef89810cf1f4402911f33b202ffd72e7"},
 }

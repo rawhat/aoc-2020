@@ -23,7 +23,8 @@ defmodule Advent.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:mix_gleam, "~> 0.1"}
+      {:mix_gleam, "~> 0.1"},
+      {:gleam_stdlib, "~> 0.12"}
     ]
   end
 end
