@@ -1,6 +1,6 @@
 import gleam/int
 import gleam/io
-import gleam/iterator
+import gleam/iterator.{Iterator}
 import gleam/list
 import gleam/option.{None, Some, unwrap}
 import gleam/result
@@ -22,7 +22,7 @@ pub fn parse() -> List(Int) {
   |> list.sort(by: int.compare)
 }
 
-pub fn get_pairs(expenses: List(Int)) -> List(List(Int)) {
+pub fn get_pairs(expenses: List(Int)) -> Iterator(List(Int)) {
   expenses
   |> iterator.from_list
   |> iterator.flat_map(fn(n) {
@@ -31,13 +31,11 @@ pub fn get_pairs(expenses: List(Int)) -> List(List(Int)) {
     |> iterator.filter(fn(m) { m > n })
     |> iterator.map(fn(m) { [m, n] })
   })
-  |> iterator.to_list
 }
 
-pub fn get_triples(expenses: List(Int)) -> List(List(Int)) {
+pub fn get_triples(expenses: List(Int)) -> Iterator(List(Int)) {
   expenses
   |> get_pairs
-  |> iterator.from_list
   |> iterator.flat_map(fn(p) {
     let [left, right] = p
 
@@ -46,11 +44,10 @@ pub fn get_triples(expenses: List(Int)) -> List(List(Int)) {
     |> iterator.filter(fn(m) { m > right })
     |> iterator.map(fn(m) { [left, right, m] })
   })
-  |> iterator.to_list
 }
 
-fn find_match(groups: List(List(Int))) -> Result(List(Int), Nil) {
-  list.find(groups, fn(g) { list.fold(g, 0, fn(m, n) { m + n }) == 2020 })
+fn find_match(groups: Iterator(List(Int))) -> Result(List(Int), Nil) {
+  iterator.find(groups, fn(g) { list.fold(g, 0, fn(m, n) { m + n }) == 2020 })
 }
 
 fn get_product(group: Result(List(Int), Nil)) -> Int {
