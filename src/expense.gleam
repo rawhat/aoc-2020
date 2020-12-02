@@ -6,11 +6,7 @@ import gleam/option.{None, Some, unwrap}
 import gleam/result
 import gleam/string
 
-pub external fn file_stream(file: String) -> List(String) =
-  "Elixir.File" "stream!"
-
-pub external fn to_list(list: List(a)) -> List(a) =
-  "Elixir.Enum" "to_list"
+import util.{file_stream, to_list}
 
 pub fn parse() -> List(Int) {
   "./data/day1.txt"
