@@ -6,6 +6,7 @@ import gleam/map.{Map}
 import gleam/option.{Some}
 import gleam/pair
 import gleam/regex.{Match}
+import gleam/result
 import gleam/set
 import gleam/string
 import util.{file_stream, to_list}
@@ -93,9 +94,10 @@ pub fn part_one() -> Int {
         }
       },
     )
-    |> iterator.to_list
-    |> list.flatten
-    |> list.any(fn(bag: Bag) -> Bool { bag.color == color_to_match })
+    |> iterator.find(fn(bags) {
+      list.any(bags, fn(bag: Bag) -> Bool { bag.color == color_to_match })
+    })
+    |> result.is_ok
   })
   |> iterator.to_list
   |> list.length
