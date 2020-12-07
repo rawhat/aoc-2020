@@ -8,14 +8,10 @@ import gleam/pair
 import gleam/regex.{Match}
 import gleam/set
 import gleam/string
-
 import util.{file_stream, to_list}
 
 pub type Bag {
-  Bag(
-    color: String,
-    contains: List(tuple(Int, String))
-  )
+  Bag(color: String, contains: List(tuple(Int, String)))
 }
 
 pub fn read_from_file() -> Map(String, Bag) {
@@ -61,9 +57,12 @@ pub fn read_rules(data: List(String)) -> Map(String, Bag) {
       }
     }
   })
-  |> list.fold(map.new(), fn(bag: Bag, bags: Map(String, Bag)) -> Map(String, Bag) {
-    map.insert(bags, bag.color, bag)
-  })
+  |> list.fold(
+    map.new(),
+    fn(bag: Bag, bags: Map(String, Bag)) -> Map(String, Bag) {
+      map.insert(bags, bag.color, bag)
+    },
+  )
 }
 
 pub fn part_one() -> Int {
@@ -76,21 +75,24 @@ pub fn part_one() -> Int {
   |> iterator.from_list
   |> iterator.filter(fn(color) {
     let Ok(initial_bag) = map.get(bags, color)
-    iterator.unfold(from: [initial_bag], with: fn(next_bags) {
-      case next_bags {
-        [] -> Done
-        next_bags -> {
-          let contains =
-            next_bags
-            |> list.map(fn(bag: Bag) -> List(Bag) {
-              bag.contains
-              |> list.filter_map(fn(p) { map.get(bags, pair.second(p)) })
-            })
-            |> list.flatten
-          Next(element: next_bags, accumulator: contains)
+    iterator.unfold(
+      from: [initial_bag],
+      with: fn(next_bags) {
+        case next_bags {
+          [] -> Done
+          next_bags -> {
+            let contains =
+              next_bags
+              |> list.map(fn(bag: Bag) -> List(Bag) {
+                bag.contains
+                |> list.filter_map(fn(p) { map.get(bags, pair.second(p)) })
+              })
+              |> list.flatten
+            Next(element: next_bags, accumulator: contains)
+          }
         }
-      }
-    })
+      },
+    )
     |> iterator.to_list
     |> list.flatten
     |> list.any(fn(bag: Bag) -> Bool { bag.color == color_to_match })
@@ -103,13 +105,15 @@ pub fn number_of_bags_inside(bags: Map(String, Bag), color: String) -> Int {
   let Ok(bag) = map.get(bags, color)
   case bag.contains {
     [] -> 0
-    contains -> {
+    contains ->
       contains
-      |> list.fold(0, fn(p, total) {
-        let tuple(count, other_color) = p
-        total + count + { count * number_of_bags_inside(bags, other_color) }
-      })
-    }
+      |> list.fold(
+        0,
+        fn(p, total) {
+          let tuple(count, other_color) = p
+          total + count + count * number_of_bags_inside(bags, other_color)
+        },
+      )
   }
 }
 

@@ -5,7 +5,6 @@ import gleam/list
 import gleam/option.{None, Some, unwrap}
 import gleam/result
 import gleam/string
-
 import util.{file_stream, to_list}
 
 pub fn parse() -> List(Int) {

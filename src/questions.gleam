@@ -3,7 +3,6 @@ import gleam/io
 import gleam/list
 import gleam/set
 import gleam/string
-
 import util.{file_to_string}
 
 pub fn read_questions(matcher: fn(String) -> Int) -> Int {

@@ -4,7 +4,6 @@ import gleam/list
 import gleam/map.{Map}
 import gleam/result
 import gleam/string
-
 import util.{file_stream, to_list}
 
 pub type Position {
@@ -15,10 +14,7 @@ pub fn move(x: Int, y: Int, x_bound: Int) -> fn(Position) -> Position {
   fn(position) {
     let Position(x: old_x, y: old_y) = position
 
-    Position(
-      x: { old_x + x } % x_bound,
-      y: old_y + y
-    )
+    Position(x: { old_x + x } % x_bound, y: old_y + y)
   }
 }
 
@@ -40,25 +36,30 @@ pub fn read_terrain() -> Terrain {
   let terrain_map =
     data
     |> list.index_map(fn(index, row) { tuple(index, string.trim(row)) })
-    |> list.fold(map.new(), fn(r, m) {
-      let tuple(row_index, row) = r
-      row
-      |> string.to_graphemes
-      |> list.index_map(fn(index, character) {
-        let position = Position(x: index, y: row_index)
-        let entry =
-          case character {
+    |> list.fold(
+      map.new(),
+      fn(r, m) {
+        let tuple(row_index, row) = r
+        row
+        |> string.to_graphemes
+        |> list.index_map(fn(index, character) {
+          let position = Position(x: index, y: row_index)
+          let entry = case character {
             "." -> Empty
             "#" -> Tree
           }
 
-        tuple(position, entry)
-      })
-      |> list.fold(m, fn(p, m) {
-        let tuple(position, entry) = p
-        map.insert(m, position, entry)
-      })
-    })
+          tuple(position, entry)
+        })
+        |> list.fold(
+          m,
+          fn(p, m) {
+            let tuple(position, entry) = p
+            map.insert(m, position, entry)
+          },
+        )
+      },
+    )
 
   let x_bound =
     data
@@ -73,7 +74,7 @@ pub fn rfind_trees(
   terrain: Terrain,
   position: Position,
   move: fn(Position) -> Position,
-  count: Int
+  count: Int,
 ) -> Int {
   let next_position = move(position)
   case map.get(terrain.map, position) {

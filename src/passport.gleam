@@ -7,7 +7,6 @@ import gleam/option.{Some}
 import gleam/regex.{Match}
 import gleam/result
 import gleam/string
-
 import util.{file_to_string}
 
 pub fn read_passports() -> List(Map(String, String)) {
@@ -67,13 +66,12 @@ pub fn get_field_validation(field: String) -> fn(String) -> Bool {
     "hgt" -> fn(hgt) {
       let Ok(hgt_regex) = regex.from_string("^(\\d+)(cm|in)$")
       case regex.scan(with: hgt_regex, content: hgt) {
-        [Match(submatches: [Some(height), Some(unit)], ..)] -> {
+        [Match(submatches: [Some(height), Some(unit)], ..)] ->
           case unit, int.parse(height) {
             "cm", Ok(n) if n >= 150 && n <= 193 -> True
             "in", Ok(n) if n >= 59 && n <= 76 -> True
             _, _ -> False
           }
-        }
         _ -> False
       }
     }
