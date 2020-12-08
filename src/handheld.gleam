@@ -3,7 +3,7 @@ import gleam/io
 import gleam/iterator.{Done, Next}
 import gleam/list
 import gleam/map.{Map}
-import gleam/option.{Some}
+import gleam/option.{None, Option, Some}
 import gleam/pair
 import gleam/regex.{Match}
 import gleam/result
@@ -19,12 +19,18 @@ pub type Instruction {
   NoOp(value: Int)
 }
 
+pub type Status {
+  Halted
+  Terminated
+}
+
 pub type Program {
   Program(
     accumulator: Int,
     history: Set(Int),
     instructions: Map(Int, Instruction),
     pointer: Int,
+    status: Option(Status),
   )
 }
 
@@ -34,6 +40,7 @@ pub fn generate_program(instructions: Map(Int, Instruction)) -> Program {
     history: set.new(),
     instructions: instructions,
     pointer: 0,
+    status: None,
   )
 }
 
@@ -119,35 +126,29 @@ pub fn read_program(input: List(String)) -> Program {
   )
 }
 
-pub fn run(program: Program) -> Result(Program, Program) {
+pub fn run(program: Program) -> Program {
   program
-  |> iterator.unfold(
-    with: fn(program: Program) {
-      Next(element: program, accumulator: execute(program))
-    },
-  )
-  |> iterator.map(fn(program: Program) -> Result(Result(Program, Program), Nil) {
+  |> iterator.unfold(with: fn(program: Program) {
+    Next(element: program, accumulator: execute(program))
+  })
+  |> iterator.map(fn(program: Program) {
     let repeated = set.contains(program.history, program.pointer)
     let terminated = program.pointer >= map.size(program.instructions)
     case repeated, terminated {
-      True, _ -> Ok(Error(program))
-      _, True -> Ok(Ok(program))
-      _, _ -> Error(Nil)
+      True, _ -> Program(..program, status: Some(Halted))
+      _, True -> Program(..program, status: Some(Terminated))
+      _, _ -> program
     }
   })
-  |> iterator.find(fn(res) { result.is_ok(res) })
-  |> result.unwrap(Error(Nil))
-  |> result.map_error(fn(_) { program })
-  |> result.flatten
+  |> iterator.find(fn(program: Program) { option.is_some(program.status) })
+  |> result.unwrap(program)
 }
 
 pub fn part_one() -> Int {
-  let Error(final_program) =
-    read_from_file()
-    |> read_program
-    |> run
-
-  final_program.accumulator
+  read_from_file()
+  |> read_program
+  |> run
+  |> fn(program: Program) { program.accumulator }
 }
 
 pub fn part_two() -> Int {
@@ -175,14 +176,9 @@ pub fn part_two() -> Int {
   })
   |> iterator.map(generate_program)
   |> iterator.map(run)
-  |> iterator.find(result.is_ok)
-  |> result.unwrap(Error(input_program))
-  |> fn(res: Result(Program, Program)) {
-    case res {
-      Ok(program) -> program.accumulator
-      Error(_) -> -1
-    }
-  }
+  |> iterator.find(fn(program: Program) { program.status == Some(Terminated) })
+  |> result.unwrap(input_program)
+  |> fn(program: Program) { program.accumulator }
 }
 
 pub fn solve() {
