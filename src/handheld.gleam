@@ -55,7 +55,8 @@ pub fn execute(program: Program) -> Program {
   program.instructions
   |> map.get(program.pointer)
   |> result.map(fn(instruction) {
-    let with_history = Program(..program, history: set.insert(program.history, program.pointer))
+    let with_history =
+      Program(..program, history: set.insert(program.history, program.pointer))
     case instruction {
       Accumulate(amount: value) ->
         Program(
@@ -64,15 +65,8 @@ pub fn execute(program: Program) -> Program {
           pointer: program.pointer + 1,
         )
       Jump(to: offset) ->
-        Program(
-          ..with_history,
-          pointer: program.pointer + offset,
-        )
-      NoOp(..) ->
-        Program(
-          ..with_history,
-          pointer: program.pointer + 1,
-        )
+        Program(..with_history, pointer: program.pointer + offset)
+      NoOp(..) -> Program(..with_history, pointer: program.pointer + 1)
     }
   })
   |> result.unwrap(program)
@@ -108,7 +102,8 @@ pub fn read_program(input: List(String)) -> Program {
       |> int.parse
       |> result.unwrap(0)
       |> fn(d) {
-        case sign { "+" -> d
+        case sign {
+          "+" -> d
           "-" -> -1 * d
         }
       }
@@ -118,19 +113,22 @@ pub fn read_program(input: List(String)) -> Program {
       "nop" -> NoOp(value: value)
     }
   })
-  |> list.fold(new_program(), fn(instruction, program) {
-    add_instruction(program, instruction)
-  })
+  |> list.fold(
+    new_program(),
+    fn(instruction, program) { add_instruction(program, instruction) },
+  )
 }
 
 pub fn run(program: Program) -> Result(Program, Program) {
   program
-  |> iterator.unfold(from: _, with: fn(program: Program) {
-    Next(element: program, accumulator: execute(program))
-  })
+  |> iterator.unfold(
+    with: fn(program: Program) {
+      Next(element: program, accumulator: execute(program))
+    },
+  )
   |> iterator.map(fn(program: Program) -> Result(Result(Program, Program), Nil) {
     let repeated = set.contains(program.history, program.pointer)
-    let terminated = { program.pointer >= map.size(program.instructions) }
+    let terminated = program.pointer >= map.size(program.instructions)
     case repeated, terminated {
       True, _ -> Ok(Error(program))
       _, True -> Ok(Ok(program))
@@ -166,13 +164,13 @@ pub fn part_two() -> Int {
     }
   })
   |> iterator.map(fn(instruction) {
-    let Ok(existing_instruction) = map.get(input_program.instructions, instruction)
-    let new_instruction =
-      case existing_instruction {
-        Jump(to: value) -> NoOp(value: value)
-        NoOp(value: value) -> Jump(to: value)
-        instruction -> instruction
-      }
+    let Ok(existing_instruction) =
+      map.get(input_program.instructions, instruction)
+    let new_instruction = case existing_instruction {
+      Jump(to: value) -> NoOp(value: value)
+      NoOp(value: value) -> Jump(to: value)
+      instruction -> instruction
+    }
     map.insert(input_program.instructions, instruction, new_instruction)
   })
   |> iterator.map(generate_program)
