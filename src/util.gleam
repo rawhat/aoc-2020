@@ -1,3 +1,4 @@
+import gleam/iterator
 import gleam/list
 import gleam/pair
 
@@ -24,4 +25,23 @@ pub fn bench(function: fn() -> a) -> Float {
   |> time
   |> pair.first
   |> fn(t) { t /. 1_000_000.0 }
+}
+
+pub fn slice(
+  with collection: List(a),
+  of length: Int,
+  from index: Int,
+) -> List(a) {
+  collection
+  |> iterator.from_list
+  |> iterator.drop(index)
+  |> iterator.take(length)
+}
+
+pub fn last(of collection: List(a)) -> Result(a, Nil) {
+  let size = list.length(collection)
+
+  collection
+  |> list.drop(size - 1)
+  |> list.at(0)
 }
