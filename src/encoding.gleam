@@ -67,22 +67,20 @@ pub fn part_one(preamble preamble: Int) -> Int {
 
 pub fn find_range(output: List(Int), target: Int) -> List(Int) {
   tuple(0, 1)
-  |> iterator.unfold(
-    with: fn(range) {
-      let tuple(lower, upper) = range
+  |> iterator.unfold(with: fn(range) {
+    let tuple(lower, upper) = range
 
-      let sublist = slice(with: output, of: upper - lower, from: lower)
-      let sum = list.fold(sublist, 0, fn(m, n) { m + n })
+    let sublist = slice(with: output, of: upper - lower, from: lower)
+    let sum = list.fold(sublist, 0, fn(m, n) { m + n })
 
-      case sum == target {
-        True -> Done
-        False if sum < target ->
-          Next(element: sublist, accumulator: tuple(lower, upper + 1))
-        False if sum > target ->
-          Next(element: sublist, accumulator: tuple(lower + 1, upper))
-      }
-    },
-  )
+    case sum == target {
+      True -> Done
+      False if sum < target ->
+        Next(element: sublist, accumulator: tuple(lower, upper + 1))
+      False if sum > target ->
+        Next(element: sublist, accumulator: tuple(lower + 1, upper))
+    }
+  })
   |> iterator.to_list
   |> last
   |> result.unwrap([])

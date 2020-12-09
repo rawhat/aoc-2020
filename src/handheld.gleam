@@ -3,7 +3,7 @@ import gleam/io
 import gleam/iterator.{Done, Next}
 import gleam/list
 import gleam/map.{Map}
-import gleam/option.{None, Option, Some}
+import gleam/option.{Some}
 import gleam/pair
 import gleam/regex.{Match}
 import gleam/result
@@ -22,6 +22,7 @@ pub type Instruction {
 pub type Status {
   Halted
   Terminated
+  Running
 }
 
 pub type Program {
@@ -30,7 +31,7 @@ pub type Program {
     history: Set(Int),
     instructions: Map(Int, Instruction),
     pointer: Int,
-    status: Option(Status),
+    status: Status,
   )
 }
 
@@ -40,7 +41,7 @@ pub fn generate_program(instructions: Map(Int, Instruction)) -> Program {
     history: set.new(),
     instructions: instructions,
     pointer: 0,
-    status: None,
+    status: Running,
   )
 }
 
@@ -135,12 +136,17 @@ pub fn run(program: Program) -> Program {
     let repeated = set.contains(program.history, program.pointer)
     let terminated = program.pointer >= map.size(program.instructions)
     case repeated, terminated {
-      True, _ -> Program(..program, status: Some(Halted))
-      _, True -> Program(..program, status: Some(Terminated))
+      True, _ -> Program(..program, status: Halted)
+      _, True -> Program(..program, status: Terminated)
       _, _ -> program
     }
   })
-  |> iterator.find(fn(program: Program) { option.is_some(program.status) })
+  |> iterator.find(fn(program: Program) {
+    case program.status {
+      Halted | Terminated -> True
+      _ -> False
+    }
+  })
   |> result.unwrap(program)
 }
 
@@ -176,7 +182,7 @@ pub fn part_two() -> Int {
   })
   |> iterator.map(generate_program)
   |> iterator.map(run)
-  |> iterator.find(fn(program: Program) { program.status == Some(Terminated) })
+  |> iterator.find(fn(program: Program) { program.status == Terminated })
   |> result.unwrap(input_program)
   |> fn(program: Program) { program.accumulator }
 }
