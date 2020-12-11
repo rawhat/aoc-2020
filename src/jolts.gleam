@@ -6,7 +6,7 @@ import gleam/map
 import gleam/result
 import gleam/set
 import gleam/string
-import util.{last, read_file}
+import util.{last, read_file, sum}
 
 pub fn get_test_joltages() -> List(Int) {
   "16
@@ -91,4 +91,34 @@ pub fn part_one() -> Int {
       _ -> product
     }
   })
+}
+
+// I based this on some existing solutions
+pub fn part_two() -> Int {
+  let joltages = get_joltages()
+
+  let adapter_counts =
+    joltages
+    |> list.fold(map.from_list([tuple(0, 1)]), fn(joltage, sums) {
+      [joltage - 1, joltage - 2, joltage - 3]
+      |> list.map(fn(prev) {
+        sums
+        |> map.get(prev)
+        |> result.unwrap(0)
+      })
+      |> sum
+      |> fn(count) {
+        map.update(sums, joltage, fn(curr) {
+          curr
+          |> result.map(fn(n) { n + count })
+          |> result.unwrap(count)
+        })
+      }
+    })
+
+  joltages
+  |> last
+  |> result.unwrap(0)
+  |> map.get(adapter_counts, _)
+  |> result.unwrap(-1)
 }

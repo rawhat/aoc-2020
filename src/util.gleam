@@ -64,3 +64,7 @@ pub fn take_while(from from: Iterator(a), where check: fn(a) -> Bool) -> Iterato
     }
   })
 }
+
+pub fn sum(of numbers: List(Int)) -> Int {
+  list.fold(numbers, 0, fn(m, n) { m + n })
+}
