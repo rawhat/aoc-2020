@@ -1,4 +1,4 @@
-import gleam/iterator
+import gleam/iterator.{Done, Iterator, Next}
 import gleam/list
 import gleam/pair
 
@@ -44,4 +44,23 @@ pub fn last(of collection: List(a)) -> Result(a, Nil) {
   collection
   |> list.drop(size - 1)
   |> list.at(0)
+}
+
+pub fn from(start start: Int) -> Iterator(Int) {
+  iterator.unfold(from: start, with: fn(next) {
+    Next(element: next, accumulator: next + 1)
+  })
+}
+
+pub fn take_while(from from: Iterator(a), where check: fn(a) -> Bool) -> Iterator(a) {
+  iterator.unfold(from: iterator.step(from), with: fn(next) {
+    case next {
+      Done -> Done
+      Next(element: element, accumulator: rest) ->
+        case check(element) {
+          True -> Next(element: element, accumulator: iterator.step(rest))
+          False -> Done
+        }
+    }
+  })
 }
