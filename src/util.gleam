@@ -14,6 +14,15 @@ pub external fn to_list(list: List(a)) -> List(a) =
 pub external fn time(function: fn() -> a) -> tuple(Float, a) =
   "timer" "tc"
 
+pub external fn abs(value: Int) -> Int =
+  "Elixir.Kernel" "abs"
+
+pub external fn sin(value: Float) -> Float =
+  "math" "sin"
+
+pub external fn cos(value: Float) -> Float =
+  "math" "cos"
+
 pub fn read_file(file: String) -> List(String) {
   file
   |> file_stream
@@ -67,4 +76,10 @@ pub fn take_while(from from: Iterator(a), where check: fn(a) -> Bool) -> Iterato
 
 pub fn sum(of numbers: List(Int)) -> Int {
   list.fold(numbers, 0, fn(m, n) { m + n })
+}
+
+// Same precision as erl `:math.pi`
+const pi = 3.141592653589793
+pub fn degrees_to_radians(degrees: Float) -> Float {
+  2.0 *. pi *. degrees /. 360.0
 }
