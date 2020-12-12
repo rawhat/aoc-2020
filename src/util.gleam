@@ -56,22 +56,29 @@ pub fn last(of collection: List(a)) -> Result(a, Nil) {
 }
 
 pub fn from(start start: Int) -> Iterator(Int) {
-  iterator.unfold(from: start, with: fn(next) {
-    Next(element: next, accumulator: next + 1)
-  })
+  iterator.unfold(
+    from: start,
+    with: fn(next) { Next(element: next, accumulator: next + 1) },
+  )
 }
 
-pub fn take_while(from from: Iterator(a), where check: fn(a) -> Bool) -> Iterator(a) {
-  iterator.unfold(from: iterator.step(from), with: fn(next) {
-    case next {
-      Done -> Done
-      Next(element: element, accumulator: rest) ->
-        case check(element) {
-          True -> Next(element: element, accumulator: iterator.step(rest))
-          False -> Done
-        }
-    }
-  })
+pub fn take_while(
+  from from: Iterator(a),
+  where check: fn(a) -> Bool,
+) -> Iterator(a) {
+  iterator.unfold(
+    from: iterator.step(from),
+    with: fn(next) {
+      case next {
+        Done -> Done
+        Next(element: element, accumulator: rest) ->
+          case check(element) {
+            True -> Next(element: element, accumulator: iterator.step(rest))
+            False -> Done
+          }
+      }
+    },
+  )
 }
 
 pub fn sum(of numbers: List(Int)) -> Int {
@@ -80,6 +87,7 @@ pub fn sum(of numbers: List(Int)) -> Int {
 
 // Same precision as erl `:math.pi`
 const pi = 3.141592653589793
+
 pub fn degrees_to_radians(degrees: Float) -> Float {
   2.0 *. pi *. degrees /. 360.0
 }

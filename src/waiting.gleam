@@ -49,7 +49,7 @@ pub fn grid_to_string(grid: Map(Position, GridItem)) -> String {
     |> iterator.to_list
     |> string.join("")
   })
-  |> take_while(fn(s) { s != ""})
+  |> take_while(fn(s) { s != "" })
   |> iterator.to_list
   |> string.join("\n")
 }
@@ -97,7 +97,7 @@ pub fn input_from_file() -> Map(Position, GridItem) {
 
 pub fn adjacent_counts(
   grid: Map(Position, GridItem),
-  position: Position
+  position: Position,
 ) -> Map(GridItem, Int) {
   [
     move_x(position, 1),
@@ -111,13 +111,20 @@ pub fn adjacent_counts(
   ]
   |> list.filter_map(map.get(grid, _))
   |> list.filter(fn(item) { item != Floor })
-  |> list.fold(map.new(), fn(item, counts) {
-    map.update(
-      counts,
-      item,
-      fn(res) { res |> result.map(fn(count) { count + 1 }) |> result.unwrap(1) }
-    )
-  })
+  |> list.fold(
+    map.new(),
+    fn(item, counts) {
+      map.update(
+        counts,
+        item,
+        fn(res) {
+          res
+          |> result.map(fn(count) { count + 1 })
+          |> result.unwrap(1)
+        },
+      )
+    },
+  )
 }
 
 pub fn update_item(
@@ -125,7 +132,7 @@ pub fn update_item(
   position: Position,
   item: GridItem,
   finder: fn(Map(Position, GridItem), Position) -> Map(GridItem, Int),
-  limit: Int
+  limit: Int,
 ) -> Result(GridItem, Nil) {
   let adjacent = finder(grid, position)
   case item {
@@ -147,7 +154,7 @@ pub fn update_item(
 pub fn step(
   grid: Map(Position, GridItem),
   finder: fn(Map(Position, GridItem), Position) -> Map(GridItem, Int),
-  limit: Int
+  limit: Int,
 ) -> List(tuple(Position, GridItem)) {
   grid
   |> map.to_list
@@ -163,21 +170,21 @@ pub fn step(
 pub fn get_occupied_seats(
   grid: Map(Position, GridItem),
   finder finder: fn(Map(Position, GridItem), Position) -> Map(GridItem, Int),
-  limit limit: Int
+  limit limit: Int,
 ) -> Int {
   grid
-  |> iterator.unfold(from: _, with: fn(grid) {
-    case step(grid, finder, limit) {
-      [] -> Done
-      changes ->
-        changes
-        |> map.from_list
-        |> map.merge(grid, _)
-        |> fn(acc) {
-          Next(element: acc, accumulator: acc)
-        }
-    }
-  })
+  |> iterator.unfold(
+    with: fn(grid) {
+      case step(grid, finder, limit) {
+        [] -> Done
+        changes ->
+          changes
+          |> map.from_list
+          |> map.merge(grid, _)
+          |> fn(acc) { Next(element: acc, accumulator: acc) }
+      }
+    },
+  )
   |> iterator.to_list
   |> last
   |> result.unwrap(map.new())
@@ -218,7 +225,7 @@ pub fn get_updater(direction: Direction) -> fn(Position) -> Position {
 pub fn next_in_direction(
   grid: Map(Position, GridItem),
   position: Position,
-  direction: Direction
+  direction: Direction,
 ) -> GridItem {
   let updater = get_updater(direction)
   let next_position = updater(position)
@@ -232,26 +239,24 @@ pub fn next_in_direction(
 
 pub fn get_adjacencies(
   grid: Map(Position, GridItem),
-  position: Position
+  position: Position,
 ) -> Map(GridItem, Int) {
-  [
-    North,
-    East,
-    South,
-    West,
-    NorthEast,
-    SouthEast,
-    SouthWest,
-    NorthWest,
-  ]
+  [North, East, South, West, NorthEast, SouthEast, SouthWest, NorthWest]
   |> list.map(next_in_direction(grid, position, _))
-  |> list.fold(map.new(), fn(pos, acc) {
-    map.update(acc, pos, fn(res) {
-      res
-      |> result.map(fn(count) { count + 1 })
-      |> result.unwrap(1)
-    })
-  })
+  |> list.fold(
+    map.new(),
+    fn(pos, acc) {
+      map.update(
+        acc,
+        pos,
+        fn(res) {
+          res
+          |> result.map(fn(count) { count + 1 })
+          |> result.unwrap(1)
+        },
+      )
+    },
+  )
 }
 
 pub fn part_two() -> Int {
