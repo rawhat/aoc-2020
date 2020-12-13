@@ -23,6 +23,9 @@ pub external fn sin(value: Float) -> Float =
 pub external fn cos(value: Float) -> Float =
   "math" "cos"
 
+pub external fn gcd(a: Int, b: Int) -> Int =
+  "Elixir.Integer" "gcd"
+
 pub fn read_file(file: String) -> List(String) {
   file
   |> file_stream
