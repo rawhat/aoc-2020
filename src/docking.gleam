@@ -28,6 +28,7 @@ pub type Program {
 }
 
 const mask_string = "^mask = ([01X]+)$"
+
 const mem_string = "^mem\\[(\\d+)\\] = (\\d+)$"
 
 pub fn extract_set_mask(str: String) -> Operation {
@@ -62,49 +63,42 @@ pub fn read_from_file() -> Program {
   "./data/day14.txt"
   |> read_file
   |> list.map(string.trim)
-	|> read_program
+  |> read_program
 }
 
 pub fn read_from_test() -> Program {
-	"mask = 000000000000000000000000000000X1001X
+  "mask = 000000000000000000000000000000X1001X
 mem[42] = 100
 mask = 00000000000000000000000000000000X0XX
 mem[26] = 1"
-	|> string.split("\n")
-	|> list.map(string.trim)
-	|> read_program
+  |> string.split("\n")
+  |> list.map(string.trim)
+  |> read_program
 }
-
 
 pub fn read_program(input: List(String)) -> Program {
   assert Ok(mask) = regex.from_string(mask_string)
   assert Ok(mem) = regex.from_string(mem_string)
 
-	input
+  input
   |> list.filter_map(fn(line) {
     case regex.scan(mask, line), regex.scan(mem, line) {
-      [Match(submatches: [Some(m)], ..)], _ ->
-        Ok(extract_set_mask(m))
+      [Match(submatches: [Some(m)], ..)], _ -> Ok(extract_set_mask(m))
       _, [Match(submatches: [Some(dest), Some(value)], ..)] ->
         Ok(extract_set_mem(dest, value))
-      _, _ ->
-        Error(Nil)
+      _, _ -> Error(Nil)
     }
   })
   |> fn(program) {
     assert [SetMask(value: value), ..rest_of_program] = program
 
-    Program(
-      instructions: rest_of_program,
-      mask: value,
-      memory: map.new(),
-    )
+    Program(instructions: rest_of_program, mask: value, memory: map.new())
   }
 }
 
 pub fn get_value_with_mask(
   value: Int,
-  mask: List(MaskElement)
+  mask: List(MaskElement),
 ) -> List(tuple(Int, MaskElement)) {
   value
   |> int.to_base_string(2)
@@ -145,8 +139,7 @@ pub fn set_memory(program: Program, location: Int, value: Int) -> Program {
 
 pub fn run_program(program: Program) -> Program {
   case program.instructions {
-    [] ->
-      program
+    [] -> program
     [SetMask(value: value), ..rest] ->
       Program(..program, mask: value, instructions: rest)
       |> run_program
@@ -160,34 +153,37 @@ pub fn run_program(program: Program) -> Program {
 }
 
 pub fn part_one() -> Int {
-	read_from_file()
+  read_from_file()
   |> run_program
   |> fn(p: Program) { map.values(p.memory) }
   |> sum
 }
 
-pub fn get_permutations(location: Int, mask: List(MaskElement)) -> List(List(Int)) {
+pub fn get_permutations(
+  location: Int,
+  mask: List(MaskElement),
+) -> List(List(Int)) {
   location
   |> get_value_with_mask(mask)
-  |> list.fold([[]], fn(next, acc) {
-    case next {
-      tuple(_, Digit(1)) -> list.map(acc, fn(l) { [1, ..l] })
-      tuple(n, Digit(0)) -> list.map(acc, fn(l) { [n, ..l] })
-      tuple(_, Skip) ->
-        acc
-        |> list.map(fn(l) {
-          list.map([0, 1], fn(n) { [n, ..l] })
-        })
-        |> list.flatten
-    }
-  })
+  |> list.fold(
+    [[]],
+    fn(next, acc) {
+      case next {
+        tuple(_, Digit(1)) -> list.map(acc, fn(l) { [1, ..l] })
+        tuple(n, Digit(0)) -> list.map(acc, fn(l) { [n, ..l] })
+        tuple(_, Skip) ->
+          acc
+          |> list.map(fn(l) { list.map([0, 1], fn(n) { [n, ..l] }) })
+          |> list.flatten
+      }
+    },
+  )
   |> list.map(list.reverse)
 }
 
 pub fn run_with_combinations(program: Program) -> Program {
   case program.instructions {
-    [] ->
-      program
+    [] -> program
     [SetMask(value: value), ..rest] ->
       Program(..program, mask: value, instructions: rest)
       |> run_with_combinations
@@ -195,16 +191,14 @@ pub fn run_with_combinations(program: Program) -> Program {
       location
       |> get_permutations(program.mask)
       |> list.map(binary_list_to_decimal)
-      |> list.fold(program.memory, fn(loc, mem) {
-        map.insert(mem, loc, value)
-      })
+      |> list.fold(program.memory, fn(loc, mem) { map.insert(mem, loc, value) })
       |> fn(mem) { Program(..program, memory: mem, instructions: rest) }
-			|> run_with_combinations
+      |> run_with_combinations
   }
 }
 
 pub fn part_two() -> Int {
-	read_from_file()
+  read_from_file()
   |> run_with_combinations
   |> fn(p: Program) { map.values(p.memory) }
   |> sum
@@ -232,7 +226,11 @@ pub fn test_value_with_mask() -> Nil {
 pub fn test_permutations() -> Nil {
   let permutations =
     extract_set_mask("000000000000000000000000000000X1001X")
-    |> fn(s: Operation) { case s { SetMask(value: value) -> value }}
+    |> fn(s: Operation) {
+      case s {
+        SetMask(value: value) -> value
+      }
+    }
     |> get_permutations(42, _)
     |> io.debug
 
@@ -242,7 +240,11 @@ pub fn test_permutations() -> Nil {
 pub fn test_other_permutations() -> Nil {
   let permutations =
     extract_set_mask("00000000000000000000000000000000X0XX")
-    |> fn(s: Operation) { case s { SetMask(value: value) -> value }}
+    |> fn(s: Operation) {
+      case s {
+        SetMask(value: value) -> value
+      }
+    }
     |> get_permutations(26, _)
     |> io.debug
 
@@ -250,8 +252,8 @@ pub fn test_other_permutations() -> Nil {
 }
 
 pub fn run_test_program() -> Int {
-	read_from_test()
-	|> run_with_combinations
+  read_from_test()
+  |> run_with_combinations
   |> fn(p: Program) { map.values(p.memory) }
   |> sum
 }

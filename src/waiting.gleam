@@ -173,18 +173,16 @@ pub fn get_occupied_seats(
   limit limit: Int,
 ) -> Int {
   grid
-  |> iterator.unfold(
-    with: fn(grid) {
-      case step(grid, finder, limit) {
-        [] -> Done
-        changes ->
-          changes
-          |> map.from_list
-          |> map.merge(grid, _)
-          |> fn(acc) { Next(element: acc, accumulator: acc) }
-      }
-    },
-  )
+  |> iterator.unfold(with: fn(grid) {
+    case step(grid, finder, limit) {
+      [] -> Done
+      changes ->
+        changes
+        |> map.from_list
+        |> map.merge(grid, _)
+        |> fn(acc) { Next(element: acc, accumulator: acc) }
+    }
+  })
   |> iterator.to_list
   |> last
   |> result.unwrap(map.new())

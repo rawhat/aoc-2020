@@ -12,10 +12,7 @@ pub type Bus {
 }
 
 pub type Schedule {
-  Schedule(
-    self_timestamp: Int,
-    buses: List(Bus),
-  )
+  Schedule(self_timestamp: Int, buses: List(Bus))
 }
 
 pub fn parse() -> Schedule {
@@ -40,10 +37,7 @@ pub fn parse() -> Schedule {
       }
     })
 
-  Schedule(
-    self_timestamp: self_timestamp,
-    buses: buses,
-  )
+  Schedule(self_timestamp: self_timestamp, buses: buses)
 }
 
 pub fn part_one() -> Int {
@@ -67,7 +61,11 @@ pub fn part_one() -> Int {
   { next_timestamp - schedule.self_timestamp } * bus.route_length
 }
 
-pub fn find_timestamp(in: List(tuple(Int, Int)), current: Int, total: Int) -> Int {
+pub fn find_timestamp(
+  in: List(tuple(Int, Int)),
+  current: Int,
+  total: Int,
+) -> Int {
   case in {
     [] -> total
     [_] -> total
@@ -82,7 +80,12 @@ pub fn find_timestamp(in: List(tuple(Int, Int)), current: Int, total: Int) -> In
 pub fn test_schedule() -> Schedule {
   Schedule(
     self_timestamp: 0,
-    buses: [Bus(route_length: 17), Bus(route_length: 0), Bus(route_length: 13), Bus(route_length: 19)]
+    buses: [
+      Bus(route_length: 17),
+      Bus(route_length: 0),
+      Bus(route_length: 13),
+      Bus(route_length: 19),
+    ],
   )
 }
 
