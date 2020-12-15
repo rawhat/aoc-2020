@@ -26,6 +26,9 @@ pub external fn cos(value: Float) -> Float =
 pub external fn gcd(a: Int, b: Int) -> Int =
   "Elixir.Integer" "gcd"
 
+pub external fn binary_to_int(binary: String, base: Int) -> Int =
+  "erlang" "binary_to_integer"
+
 pub fn read_file(file: String) -> List(String) {
   file
   |> file_stream
