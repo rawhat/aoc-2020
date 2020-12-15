@@ -97,3 +97,10 @@ const pi = 3.141592653589793
 pub fn degrees_to_radians(degrees: Float) -> Float {
   2.0 *. pi *. degrees /. 360.0
 }
+
+pub fn drop_last(collection: List(a), count: Int) -> List(a) {
+  collection
+  |> list.reverse
+  |> list.drop(count)
+  |> list.reverse
+}
