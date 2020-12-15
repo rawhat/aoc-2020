@@ -19,7 +19,8 @@ pub fn get_puzzle() -> List(Int) {
 pub fn find_last(spoken: List(Int), value: Int, distance: Int) -> Int {
   case spoken {
     [] -> 0
-    [n, ..] if n == value -> distance + 1 // Turns are 1-indexed
+    // Turns are 1-indexed
+    [n, ..] if n == value -> distance + 1
     [_, ..rest] -> find_last(rest, value, distance + 1)
   }
 }
@@ -32,9 +33,12 @@ pub fn take_turn(spoken: List(Int)) -> List(Int) {
 }
 
 pub fn generate(puzzle: List(Int)) -> Iterator(List(Int)) {
-  iterator.unfold(from: puzzle, with: fn(next_puzzle) {
-    Next(element: next_puzzle, accumulator: take_turn(next_puzzle))
-  })
+  iterator.unfold(
+    from: puzzle,
+    with: fn(next_puzzle) {
+      Next(element: next_puzzle, accumulator: take_turn(next_puzzle))
+    },
+  )
 }
 
 pub fn get_nth(puzzle: List(Int), nth: Int) -> Int {
@@ -53,22 +57,17 @@ pub fn part_one() -> Int {
 }
 
 pub type Game {
-  Game(
-    last_spoken: Int,
-    spoken_at: Map(Int, Int),
-    turn: Int,
-  )
+  Game(last_spoken: Int, spoken_at: Map(Int, Int), turn: Int)
 }
 
 pub fn get_game(puzzle: List(Int)) -> Game {
   assert Ok(last_spoken) = last(puzzle)
   Game(
     last_spoken: last_spoken,
-    spoken_at:
-      puzzle
-      |> drop_last(1)
-      |> list.index_map(fn(i, n) { tuple(n, i + 1) })
-      |> map.from_list,
+    spoken_at: puzzle
+    |> drop_last(1)
+    |> list.index_map(fn(i, n) { tuple(n, i + 1) })
+    |> map.from_list,
     turn: list.length(puzzle),
   )
 }
@@ -92,9 +91,9 @@ pub fn play_game(game: Game) -> Game {
 
 pub fn get_game_turn(game: Game, turn: Int) -> Result(Game, Nil) {
   game
-  |> iterator.unfold(from: _, with: fn(game) {
-    Next(element: game, accumulator: play_game(game))
-  })
+  |> iterator.unfold(
+    with: fn(game) { Next(element: game, accumulator: play_game(game)) },
+  )
   |> iterator.find(fn(g: Game) { g.turn == turn })
 }
 
