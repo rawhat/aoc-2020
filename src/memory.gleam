@@ -91,9 +91,9 @@ pub fn play_game(game: Game) -> Game {
 
 pub fn get_game_turn(game: Game, turn: Int) -> Result(Game, Nil) {
   game
-  |> iterator.unfold(
-    with: fn(game) { Next(element: game, accumulator: play_game(game)) },
-  )
+  |> iterator.unfold(with: fn(game) {
+    Next(element: game, accumulator: play_game(game))
+  })
   |> iterator.find(fn(g: Game) { g.turn == turn })
 }
 

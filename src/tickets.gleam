@@ -38,20 +38,28 @@ pub fn read_rules() -> List(Rule) {
   |> list.map(string.trim)
   |> list.map(regex.scan(rule_regex, _))
   |> list.map(fn(m) {
-    assert [Match(submatches: [
-      Some(field),
-      Some(first_from),
-      Some(first_to),
-      Some(second_from),
-      Some(second_to),
-    ], ..)] = m
+    assert [
+      Match(
+        submatches: [
+          Some(field),
+          Some(first_from),
+          Some(first_to),
+          Some(second_from),
+          Some(second_to),
+        ],
+        ..,
+      ),
+    ] = m
 
     Rule(
       field: field,
       ranges: [
         Range(from: get_range_value(first_from), to: get_range_value(first_to)),
-        Range(from: get_range_value(second_from), to: get_range_value(second_to)),
-      ]
+        Range(
+          from: get_range_value(second_from),
+          to: get_range_value(second_to),
+        ),
+      ],
     )
   })
 }
@@ -127,7 +135,7 @@ pub fn valid_tickets(tickets: List(Ticket)) -> List(Ticket) {
 
 pub fn rules_for_position(
   rules: Map(Int, List(Rule)),
-  valid: Map(Int, Rule)
+  valid: Map(Int, Rule),
 ) -> Map(Int, Rule) {
   let is_empty =
     rules
@@ -153,7 +161,6 @@ pub fn rules_for_position(
             tuple(position, list.filter(rules_to_update, fn(r) { r != rule }))
           })
           |> map.from_list
-
         tuple(new_rules, map.insert(valid, position, rule))
       })
       |> result.unwrap(tuple(rules, valid))
@@ -176,21 +183,29 @@ pub fn part_two() -> Int {
 
   let ordered_rule_sets: Map(Int, List(Int)) =
     valid_tickets
-    |> list.fold(map.new(), fn(ticket: Ticket, m) {
-      ticket.values
-      |> list.index_map(fn(index, value) {
-        tuple(index, value)
-      })
-      |> list.fold(m, fn(p, acc) {
-        assert tuple(index, value) = p
-        map.update(acc, index, fn(res) {
-          case res {
-            Ok(rest) -> [value, ..rest]
-            _ -> [value]
-          }
-        })
-      })
-    })
+    |> list.fold(
+      map.new(),
+      fn(ticket: Ticket, m) {
+        ticket.values
+        |> list.index_map(fn(index, value) { tuple(index, value) })
+        |> list.fold(
+          m,
+          fn(p, acc) {
+            assert tuple(index, value) = p
+            map.update(
+              acc,
+              index,
+              fn(res) {
+                case res {
+                  Ok(rest) -> [value, ..rest]
+                  _ -> [value]
+                }
+              },
+            )
+          },
+        )
+      },
+    )
 
   let rule_to_position =
     from(0)
@@ -208,9 +223,7 @@ pub fn part_two() -> Int {
       })
     })
     |> iterator.to_list
-    |> list.index_map(fn(i, rules) {
-      tuple(i, rules)
-    })
+    |> list.index_map(fn(i, rules) { tuple(i, rules) })
     |> map.from_list
     |> rules_for_position(map.new())
     |> map.to_list
@@ -218,9 +231,7 @@ pub fn part_two() -> Int {
     |> map.from_list
 
   rules
-  |> list.filter(fn(rule: Rule) {
-    string.contains(rule.field, "departure")
-  })
+  |> list.filter(fn(rule: Rule) { string.contains(rule.field, "departure") })
   |> list.filter_map(map.get(rule_to_position, _))
   |> list.filter_map(list.at(my_ticket.values, _))
   |> list.fold(1, fn(m, n) { m * n })
